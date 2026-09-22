@@ -1,0 +1,18 @@
+{
+  "name": "@codexreset/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@codexreset/db": "workspace:*",
+    "@codexreset/shared": "workspace:*",
+    "dotenv": "^17.0.0",
+    "tsx": "^4.23.0"
+  }
+}

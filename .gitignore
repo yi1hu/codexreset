@@ -1,0 +1,17 @@
+node_modules/
+.pnpm-store/
+.next/
+dist/
+coverage/
+*.tsbuildinfo
+*.log
+.DS_Store
+
+# Local secrets
+.env
+.env.local
+.env.*.local
+
+# Editor settings
+.idea/
+.vscode/
