@@ -12,6 +12,16 @@ export const signalPhases = ["HINT", "SCHEDULED", "COMPLETED", "UNKNOWN"] as con
 
 export const trustTiers = ["A1", "A2", "B", "C", "D"] as const;
 
+export const sourceKinds = [
+  "x_api",
+  "openai_status",
+  "github",
+  "aggregator",
+  "manual",
+] as const;
+
+export const relationTypes = ["original", "reply", "quote", "repost", "unknown"] as const;
+
 export const confidenceLevels = ["LOW", "MEDIUM", "HIGH"] as const;
 
 export type SignalClassification = (typeof signalClassifications)[number];
@@ -19,6 +29,31 @@ export type ResetMode = (typeof resetModes)[number];
 export type SignalPhase = (typeof signalPhases)[number];
 export type TrustTier = (typeof trustTiers)[number];
 export type ConfidenceLevel = (typeof confidenceLevels)[number];
+export type SourceKind = (typeof sourceKinds)[number];
+export type RelationType = (typeof relationTypes)[number];
+
+export interface CollectorSourceSeed {
+  name: string;
+  displayName: string;
+  kind: SourceKind;
+  baseUrl: string;
+  trustTier: TrustTier;
+  pollIntervalSeconds: number;
+  enabled: boolean;
+  configuration: Record<string, unknown>;
+}
+
+export interface CollectedPost {
+  externalId: string;
+  authorHandle: string | null;
+  authorDisplayName: string | null;
+  sourceUrl: string;
+  relationType: RelationType;
+  publishedAt: Date;
+  contentText: string;
+  contentHash: string;
+  rawPayload: Record<string, unknown>;
+}
 
 export interface EvidenceReference {
   rawPostId: string;

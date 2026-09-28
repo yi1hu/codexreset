@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "build": "tsc --noEmit",
+    "collect:once": "tsx src/run-once.ts",
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@codexreset/collectors": "workspace:*",
     "@codexreset/db": "workspace:*",
     "@codexreset/shared": "workspace:*",
     "dotenv": "^17.0.0",

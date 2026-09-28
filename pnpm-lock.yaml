@@ -221,6 +221,9 @@ importers:
 
   apps/worker:
     dependencies:
+      '@codexreset/collectors':
+        specifier: workspace:*
+        version: link:../../packages/collectors
       '@codexreset/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -248,6 +251,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@codexreset/domain':
+        specifier: workspace:*
+        version: link:../domain
       dotenv:
         specifier: ^17.0.0
         version: 17.4.2

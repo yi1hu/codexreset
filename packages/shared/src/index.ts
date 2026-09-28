@@ -4,6 +4,10 @@ const serverEnvSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   APP_URL: z.url().default("http://localhost:3000"),
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(600_000),
+  GITHUB_TOKEN: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().min(1).optional(),
+  ),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

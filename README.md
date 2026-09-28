@@ -1,12 +1,11 @@
 # Codex Reset Observatory
 
 Codex Reset Observatory is an evidence-first system for collecting, reviewing, and eventually
-forecasting Codex reset signals. This repository currently contains the **stage 2 engineering
-foundation**: application shells, the database schema, migrations, health checks, and container
-configuration.
+forecasting Codex reset signals. The current **stage 3** implementation includes the engineering
+foundation plus production-oriented collection from two official public sources.
 
-Collection connectors, signal classification, forecasting, and the full dashboard are deliberately
-out of scope for this stage.
+Signal classification, automatic Reset confirmation, forecasting, and the full dashboard remain
+deliberately out of scope. Collected records are evidence candidates, not confirmed Reset events.
 
 ## Stack
 
@@ -21,12 +20,12 @@ out of scope for this stage.
 ```text
 apps/
   web/          Next.js application and health endpoint
-  worker/       Background-process lifecycle scaffold
+  worker/       Scheduled collector runtime and one-shot command
 packages/
   db/           Drizzle schema, connection, and migrations
   domain/       Stable domain vocabulary and types
   shared/       Shared runtime configuration
-  collectors/   Collector boundary (implementation follows later)
+  collectors/   Source adapters, HTTP retry, ETag handling, and isolated runner
   classifier/   Classifier boundary (implementation follows later)
   forecast/     Forecast boundary (implementation follows later)
 ```
@@ -60,8 +59,30 @@ Start both processes:
 pnpm dev
 ```
 
+Run an immediate collection cycle without waiting for the scheduler:
+
+```bash
+pnpm collect:once
+```
+
 The web application runs at `http://localhost:3000`. Its readiness endpoint is
-`http://localhost:3000/api/health` and returns HTTP 503 until the configured database is reachable.
+`http://localhost:3000/api/health`. It returns HTTP 503 when PostgreSQL is unavailable and reports
+each collector as `ok`, `stale`, `down`, or `never-run` when the database is reachable.
+
+## Collector sources
+
+| Source | Poll interval | Stored scope | Authentication |
+| --- | ---: | --- | --- |
+| OpenAI Status | 5 minutes | Incident updates mentioning Codex or Work Mode | None |
+| `openai/codex` GitHub Releases | 15 minutes | Published releases | Optional `GITHUB_TOKEN` |
+
+Both collectors use conditional ETag requests, bounded retries, `Retry-After`, timeouts, and SHA-256
+content hashes. The database uniqueness key `(source_id, external_id, content_hash)` makes repeated
+collection idempotent while retaining a new version when upstream content changes.
+
+The GitHub releases endpoint works without authentication for public data. Setting an optional
+`GITHUB_TOKEN` only raises the API rate limit; no Codex login, browser cookie, `auth.json`, or personal
+usage data is read.
 
 ## Docker Compose
 

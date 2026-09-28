@@ -11,6 +11,7 @@
   },
   "scripts": {
     "build": "pnpm --filter @codexreset/web build && pnpm --filter @codexreset/worker build",
+    "collect:once": "pnpm --filter @codexreset/worker collect:once",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx packages/db/src/migrate.ts",
     "db:studio": "drizzle-kit studio",

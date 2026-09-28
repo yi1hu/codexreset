@@ -1,19 +1,28 @@
 import "dotenv/config";
 
-import { closeDatabase, pingDatabase } from "@codexreset/db";
+import { closeDatabase } from "@codexreset/db";
 import { getServerEnv } from "@codexreset/shared";
+
+import { runCollectionCycle } from "./runtime";
 
 const env = getServerEnv();
 let shuttingDown = false;
+let cycleRunning = false;
 
-async function checkFoundation(): Promise<void> {
+async function runScheduledCycle(): Promise<void> {
+  if (cycleRunning) {
+    console.warn(JSON.stringify({ component: "worker", event: "cycle_skipped", reason: "busy" }));
+    return;
+  }
+
+  cycleRunning = true;
   try {
-    await pingDatabase();
+    const results = await runCollectionCycle();
     console.info(
       JSON.stringify({
         component: "worker",
-        event: "foundation_check",
-        database: "ok",
+        event: "collection_cycle",
+        results,
         checkedAt: new Date().toISOString(),
       }),
     );
@@ -21,12 +30,13 @@ async function checkFoundation(): Promise<void> {
     console.error(
       JSON.stringify({
         component: "worker",
-        event: "foundation_check",
-        database: "unavailable",
+        event: "collection_cycle_failed",
         checkedAt: new Date().toISOString(),
-        message: error instanceof Error ? error.message : "Unknown database error",
+        message: error instanceof Error ? error.message : "Unknown worker error",
       }),
     );
+  } finally {
+    cycleRunning = false;
   }
 }
 
@@ -46,8 +56,8 @@ console.info(
   }),
 );
 
-void checkFoundation();
-setInterval(() => void checkFoundation(), env.WORKER_POLL_INTERVAL_MS);
+void runScheduledCycle();
+setInterval(() => void runScheduledCycle(), env.WORKER_POLL_INTERVAL_MS);
 
 process.on("SIGINT", () => void shutdown("SIGINT"));
 process.on("SIGTERM", () => void shutdown("SIGTERM"));
